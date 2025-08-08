@@ -8,6 +8,7 @@ import Checkout from "./pages/Checkout";
 import Navbar from "./components/Navbar";
 import { CartProvider } from "./context/CartContext";
 
+
 //import {CartProvider} from './context/CartContext';
 
 function App() {

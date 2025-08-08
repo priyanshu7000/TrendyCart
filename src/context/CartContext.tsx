@@ -24,17 +24,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<Product[]>([]);
 
   const addToCart = (product: Product) => {
+    console.log("Adding to cart:", product);
     setCartItems((prevItems) => {
       const existing = prevItems.find((item) => item.id === product.id);
+      let updated;
       if (existing) {
-        return prevItems.map((item) =>
+        updated = prevItems.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       } else {
-        return [...prevItems, { ...product, quantity: 1 }];
+        updated = [...prevItems, { ...product, quantity: 1 }];
       }
+      console.log("Cart after update:", updated);
+      return updated;
     });
   };
 

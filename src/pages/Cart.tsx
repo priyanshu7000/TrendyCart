@@ -70,7 +70,7 @@ const Cart = () => {
       </div>
 
       <div className="mt-6 text-lg font-semibold">
-        Total: ₹{getTotalPrice.toFixed(2)}
+        Total: ₹{getTotalPrice().toFixed(2)}
       </div>
 
       <button

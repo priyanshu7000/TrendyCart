@@ -7,68 +7,90 @@ const Navbar = () => {
   const { totalQuantity } = useCart();
 
   return (
-    <nav className="bg-white shadow-md ">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          {/* Logo and Brand Name */}
-          <div className="flex-shrink-0 text-2xl font-bold text-purple-600">
+    <nav className=" sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md shadow-sm pt-4 pl-4 pr-4">
+      <div className="w-full">
+        <div className="w-full flex justify-between h-16 items-center">
+          {/* Logo */}
+          <div className="flex-shrink-0 text-2xl font-bold text-primary">
             <Link to="/">TrendyCart</Link>
           </div>
 
-          {/*Desktop Links*/}
-          <div className="space-x-4">
-            <Link to="/" className="text-gray-700 hover:text-purple-600">
+          {/* Search Bar */}
+          <div className="hidden md:flex flex-1 mx-8">
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+            />
+          </div>
+
+          {/* Desktop Links */}
+          <div className="hidden md:flex items-center gap-6 text-secondary font-medium">
+            <Link to="/" className="hover:text-primary transition-colors">
               Home
             </Link>
             <Link
               to="/products"
-              className="text-gray-700 hover:text-purple-600"
+              className="hover:text-primary transition-colors"
             >
               Products
             </Link>
-            <Link to="/cart" className="text-gray-700 hover:text-purple-600">
-              Cart
-            </Link>
             <Link
               to="/checkout"
-              className="text-gray-700 hover:text-purple-600"
+              className="hover:text-primary transition-colors"
             >
               Checkout
             </Link>
+
+            {/* Cart Icon */}
+            <Link to="/cart" className="relative">
+              <span className="text-2xl">🛒</span>
+              {totalQuantity > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  {totalQuantity}
+                </span>
+              )}
+            </Link>
+
+            {/* Profile Icon */}
+            <div className="relative group cursor-pointer">
+              <span className="text-2xl">👤</span>
+              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                <Link
+                  to="/profile"
+                  className="block px-4 py-2 hover:bg-gray-100"
+                >
+                  Profile
+                </Link>
+                <Link to="/login" className="block px-4 py-2 hover:bg-gray-100">
+                  Login
+                </Link>
+                <button className="w-full text-left px-4 py-2 hover:bg-gray-100">
+                  Logout
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Cart Icon with Item Count */}
-          <Link to="/cart" className="relative">
-            <span className="text-2xl">🛒</span>
-            {totalQuantity > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
-                {totalQuantity}
-              </span>
-            )}
-          </Link>
-          {/*Hamburger Button*/}
+          {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700 hover:text-purple-600 focus:outline-none"
+              className="text-secondary hover:text-primary focus:outline-none"
             >
-              {/* Hamburger Icon */}
               <svg
                 className="h-6 w-6"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
                 viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   d={
-                    isOpen
-                      ? "M6 18L18 6M6 6l12 12" //x icon when open
-                      : "M4 6h16M4 12h16M4 18h16"
-                  } // Hamburger icon
+                    isOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"
+                  }
                 />
               </svg>
             </button>
@@ -77,27 +99,38 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden mt-2 flex flex-col space-y-4">
-            <Link to="/" className="text-gray-700 hover:text-purple-600 py-2">
+          <div className="md:hidden mt-2 flex flex-col space-y-4 pb-4">
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <Link to="/" className="hover:text-primary transition-colors">
               Home
             </Link>
             <Link
               to="/products"
-              className="text-gray-700 hover:text-purple-600 py-2"
+              className="hover:text-primary transition-colors"
             >
               Products
             </Link>
             <Link
-              to="/cart"
-              className="text-gray-700 hover:text-purple-600 py-2"
+              to="/checkout"
+              className="hover:text-primary transition-colors"
             >
+              Checkout
+            </Link>
+            <Link to="/cart" className="hover:text-primary transition-colors">
               Cart
             </Link>
             <Link
-              to="/checkout"
-              className="text-gray-700 hover:text-purple-600 py-2"
+              to="/profile"
+              className="hover:text-primary transition-colors"
             >
-              Checkout
+              Profile
+            </Link>
+            <Link to="/login" className="hover:text-primary transition-colors">
+              Login
             </Link>
           </div>
         )}

@@ -4,7 +4,7 @@ import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { totalQuantity } = useCart();
+  const { getTotalQuantity } = useCart();
 
   return (
     <nav className=" sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md shadow-sm pt-4 pl-4 pr-4">
@@ -45,9 +45,9 @@ const Navbar = () => {
             {/* Cart Icon */}
             <Link to="/cart" className="relative">
               <span className="text-2xl">🛒</span>
-              {totalQuantity > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                  {totalQuantity}
+              {getTotalQuantity() > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full text-xs font-bold px-1.5 py-0.5 flex items-center justify-center min-w-[18px] min-h-[18px]">
+                  {getTotalQuantity()}
                 </span>
               )}
             </Link>

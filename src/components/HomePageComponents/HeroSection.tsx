@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import banner from "../../assets/Gemini_Generated_Image_g20lug20lug20lug.png"; // Adjust the path as necessary
 import home from "../../assets/categories/Home.png";
 import electonics from "../../assets/categories/Electronics.png";
@@ -88,21 +89,22 @@ const HeroSection = () => {
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
           {categories.map((category, index) => (
-            <div
+            <Link
+              to={`/category/${category.name.toLowerCase()}`}
               key={index}
-              className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transform hover:-translate-y-2 hover:scale-105 transition-all duration-300"
+              className="group bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transform hover:-translate-y-2 hover:scale-105 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <img
                 src={category.image}
                 alt={category.name}
-                className="w-full h-40 object-cover"
+                className="w-full h-40 object-cover group-hover:opacity-90 transition"
               />
               <div className="p-4 text-center">
-                <h3 className="text-lg font-semibold text-purple-700">
+                <h3 className="text-lg font-semibold text-purple-700 group-hover:text-purple-900 transition">
                   {category.name}
                 </h3>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

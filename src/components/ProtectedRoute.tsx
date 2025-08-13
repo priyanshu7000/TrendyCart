@@ -1,12 +1,17 @@
-// src/components/ProtectedRoute.tsx
-import { Navigate } from "react-router-dom";
+// components/ProtectedRoute.tsx
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export default function ProtectedRoute({ children }: { children: JSX.Element }) {
-  const { user, loading } = useAuth();
-  if (loading) return <div className="p-6">Loading...</div>;
-  if (!user) return <Navigate to="/signin" replace />;
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  if (!user) {
+    // Store the current path so we can redirect after login
+    return <Navigate to={`/login?redirectTo=${location.pathname}`} replace />;
+  }
+
   return children;
-}
-// This component checks if the user is authenticated before rendering the children components.
-// If the user is not authenticated, it redirects them to the sign-in page.
+};
+
+export default ProtectedRoute;

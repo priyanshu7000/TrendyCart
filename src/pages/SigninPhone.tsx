@@ -1,127 +1,124 @@
-import { useRef, useState } from "react";
-import { auth } from "../lib/firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import React, { useState } from "react";
+import { auth, setUpRecaptcha } from "../lib/firebase";
 
-import type { ConfirmationResult } from "firebase/auth";
+import { signInWithPhoneNumber  } from "firebase/auth";
+import type{ConfirmationResult} from "firebase/auth";
 
-export default function SigninPhone() {
-  const [phone, setPhone] = useState(""); // e.g. +91XXXXXXXXXX
-  const [code, setCode] = useState(""); // 6-digit OTP
-  const [step, setStep] = useState<"enter" | "verify">("enter");
-  const [sending, setSending] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const confirmRef = useRef<ConfirmationResult | null>(null);
+declare global {
+  interface Window {
+    recaptchaVerifier: any;
+    confirmationResult: ConfirmationResult;
+  }
+}
 
-  // --- Setup Recaptcha ---
-  const setupRecaptcha = () => {
-    if (!(window as any).recaptchaVerifier) {
-      (window as any).recaptchaVerifier = new RecaptchaVerifier(
-        "recaptcha-container", // ✅ element ID first
-        { size: "invisible" },
-        auth // ✅ auth is last
-      );
-    }
-    return (window as any).recaptchaVerifier as RecaptchaVerifier;
-  };
+const SigninPhone: React.FC = () => {
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const [loading, setLoading] = useState(false);
 
-  // --- Send OTP ---
-  const sendOtp = async () => {
-    setError(null);
-
-    // ✅ Validate phone format
-    if (!/^\+[1-9]\d{1,14}$/.test(phone)) {
-      setError("Invalid phone number. Use format: +919876543210");
+  // Send OTP
+  const handleSendOTP = async () => {
+    if (!phone || phone.length !== 10) {
+      alert("Please enter a valid 10-digit number");
       return;
     }
 
-    setSending(true);
     try {
-      const appVerifier = await setupRecaptcha();
+      setLoading(true);
+      setUpRecaptcha(); // setup invisible reCAPTCHA
+      const appVerifier = window.recaptchaVerifier;
+
+      const fullPhone = `+91${phone}`;
       const confirmation = await signInWithPhoneNumber(
         auth,
-        phone,
+        fullPhone,
         appVerifier
       );
-      confirmRef.current = confirmation;
-      setStep("verify");
-    } catch (e: any) {
-      console.error("OTP Error:", e);
-      setError(e?.message || "Failed to send OTP");
-      // Reset verifier so next try works
-      (window as any).recaptchaVerifier = null;
+
+      window.confirmationResult = confirmation;
+      setStep("otp");
+      alert("OTP sent successfully!");
+    } catch (err: any) {
+      console.error("Error sending OTP:", err);
+      alert(err.message);
     } finally {
-      setSending(false);
+      setLoading(false);
     }
   };
 
-  // --- Verify OTP ---
-  const verifyOtp = async () => {
-    setError(null);
-    setVerifying(true);
+  // Verify OTP
+  const handleVerifyOTP = async () => {
+    if (!otp) {
+      alert("Please enter OTP");
+      return;
+    }
+
     try {
-      await confirmRef.current?.confirm(code);
-      // ✅ success — onAuthStateChanged in AuthContext will update user
-    } catch (e: any) {
-      setError("Invalid or expired code");
+      setLoading(true);
+      const result = await window.confirmationResult.confirm(otp);
+      console.log("User signed in:", result.user);
+      alert("Phone number verified successfully!");
+    } catch (err: any) {
+      console.error("Error verifying OTP:", err);
+      alert(err.message);
     } finally {
-      setVerifying(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4 text-purple-600">
-        Sign in with Phone
-      </h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+      <div className="bg-white p-6 rounded-xl shadow-lg w-96">
+        <h2 className="text-xl font-bold mb-4">Login or Signup</h2>
 
-      {step === "enter" && (
-        <div className="space-y-4">
-          <input
-            className="w-full border rounded px-3 py-2"
-            placeholder="+91XXXXXXXXXX"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
-          <button
-            onClick={sendOtp}
-            disabled={sending}
-            className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 disabled:opacity-60"
-          >
-            {sending ? "Sending OTP..." : "Send OTP"}
-          </button>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-        </div>
-      )}
+        {step === "phone" && (
+          <>
+            <div className="flex items-center border rounded px-3 py-2">
+              <span className="mr-2">+91</span>
+              <input
+                type="tel"
+                placeholder="Enter phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full outline-none"
+              />
+            </div>
 
-      {step === "verify" && (
-        <div className="space-y-4">
-          <input
-            className="w-full border rounded px-3 py-2 tracking-widest text-center"
-            placeholder="Enter 6-digit code"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            maxLength={6}
-          />
-          <button
-            onClick={verifyOtp}
-            disabled={verifying || code.length < 6}
-            className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700 disabled:opacity-60"
-          >
-            {verifying ? "Verifying..." : "Verify & Continue"}
-          </button>
-          <button
-            onClick={() => setStep("enter")}
-            className="w-full border py-2 rounded"
-          >
-            Edit phone
-          </button>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-        </div>
-      )}
+            <div id="recaptcha-container"></div>
 
-      {/* Required for reCAPTCHA */}
-      <div id="recaptcha-container"></div>
+            <button
+              onClick={handleSendOTP}
+              disabled={loading}
+              className="w-full bg-purple-600 text-white py-2 mt-4 rounded hover:bg-purple-700 transition"
+            >
+              {loading ? "Sending..." : "Continue"}
+            </button>
+          </>
+        )}
+
+        {step === "otp" && (
+          <>
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="w-full border rounded px-3 py-2"
+            />
+
+            <button
+              onClick={handleVerifyOTP}
+              disabled={loading}
+              className="w-full bg-green-600 text-white py-2 mt-4 rounded hover:bg-green-700 transition"
+            >
+              {loading ? "Verifying..." : "Verify OTP"}
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
-}
+};
+
+export default SigninPhone;

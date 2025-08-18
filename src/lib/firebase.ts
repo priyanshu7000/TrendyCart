@@ -1,11 +1,7 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// import { getAuth, RecaptchaVerifier } from "firebase/auth";
+import { getAuth } from "firebase/auth";
+import { RecaptchaVerifier } from "firebase/auth";
 const firebaseConfig = {
   apiKey: "AIzaSyC8q3OAi4qU-YfUAT1AA1iFR4qPw_HRpKg",
   authDomain: "trendycart-5e5d6.firebaseapp.com",
@@ -16,6 +12,20 @@ const firebaseConfig = {
   measurementId: "G-JP48TPBLZ7",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+export const auth = getAuth(app);
+
+export const setUpRecaptcha = () => {
+  if (!window.recaptchaVerifier) {
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      auth,
+      "recaptcha-container",
+      {
+        size: "invisible",
+        callback: () => {
+          console.log("reCAPTCHA solved");
+        },
+      }
+    );
+  }
+};

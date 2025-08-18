@@ -1,67 +1,61 @@
-import React, { useState } from "react";
-import { auth, setUpRecaptcha } from "../lib/firebase";
-
-import { signInWithPhoneNumber  } from "firebase/auth";
-import type{ConfirmationResult} from "firebase/auth";
+import React, { useEffect, useState } from "react";
+import { auth, setupRecaptcha, sendOtpE164 } from "../lib/firebase";
+import type { ConfirmationResult } from "firebase/auth";
 
 declare global {
   interface Window {
-    recaptchaVerifier: any;
     confirmationResult: ConfirmationResult;
   }
 }
 
 const SigninPhone: React.FC = () => {
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(""); // 10 digits only UI
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [loading, setLoading] = useState(false);
 
-  // Send OTP
+  // Ensure the reCAPTCHA container exists before init
+  useEffect(() => {
+    if (step === "phone") {
+      // Initialize (or reuse) reCAPTCHA once the container is mounted
+      setupRecaptcha();
+    }
+  }, [step]);
+
   const handleSendOTP = async () => {
-    if (!phone || phone.length !== 10) {
-      alert("Please enter a valid 10-digit number");
+    if (!/^\d{10}$/.test(phone)) {
+      alert("Please enter a valid 10-digit Indian mobile number.");
       return;
     }
-
     try {
       setLoading(true);
-      setUpRecaptcha(); // setup invisible reCAPTCHA
-      const appVerifier = window.recaptchaVerifier;
-
-      const fullPhone = `+91${phone}`;
-      const confirmation = await signInWithPhoneNumber(
-        auth,
-        fullPhone,
-        appVerifier
-      );
-
+      const e164 = `+91${phone}`;
+      const confirmation = await sendOtpE164(e164);
       window.confirmationResult = confirmation;
       setStep("otp");
       alert("OTP sent successfully!");
     } catch (err: any) {
       console.error("Error sending OTP:", err);
-      alert(err.message);
+      alert(err?.code ? `${err.code}: ${err.message}` : err?.message || "Failed to send OTP.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Verify OTP
   const handleVerifyOTP = async () => {
-    if (!otp) {
-      alert("Please enter OTP");
+    if (!/^\d{4,8}$/.test(otp)) { // most OTPs are 6, but allow 4-8 for test numbers
+      alert("Please enter a valid OTP.");
       return;
     }
-
     try {
       setLoading(true);
       const result = await window.confirmationResult.confirm(otp);
       console.log("User signed in:", result.user);
       alert("Phone number verified successfully!");
+      // TODO: navigate or persist user here
     } catch (err: any) {
       console.error("Error verifying OTP:", err);
-      alert(err.message);
+      alert(err?.code ? `${err.code}: ${err.message}` : err?.message || "Failed to verify OTP.");
     } finally {
       setLoading(false);
     }
@@ -80,12 +74,14 @@ const SigninPhone: React.FC = () => {
                 type="tel"
                 placeholder="Enter phone number"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                 className="w-full outline-none"
+                inputMode="numeric"
               />
             </div>
 
-            <div id="recaptcha-container"></div>
+            {/* reCAPTCHA container MUST exist before setupRecaptcha() */}
+            <div id="recaptcha-container" className="mt-3" />
 
             <button
               onClick={handleSendOTP}
@@ -103,8 +99,9 @@ const SigninPhone: React.FC = () => {
               type="text"
               placeholder="Enter OTP"
               value={otp}
-              onChange={(e) => setOtp(e.target.value)}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
               className="w-full border rounded px-3 py-2"
+              inputMode="numeric"
             />
 
             <button

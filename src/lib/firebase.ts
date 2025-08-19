@@ -1,20 +1,7 @@
-// src/lib/firebase.ts
 import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  type ConfirmationResult,
-} from "firebase/auth";
-
-declare global {
-  interface Window {
-    recaptchaVerifier?: RecaptchaVerifier;
-    recaptchaWidgetId?: number;
-  }
-}
-
-// --- Firebase config from env (Vite) ---
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -25,45 +12,20 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// --- Initialize ---
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+//Export Auth & FireStore instances
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+//we are using the email and password 
 
-// --- Create (or reuse) reCAPTCHA ---
-// IMPORTANT: Correct constructor signature is:
-// new RecaptchaVerifier(containerOrId, parameters, auth)
-export function setupRecaptcha(): RecaptchaVerifier {
-  if (!window.recaptchaVerifier) {
-    window.recaptchaVerifier = new RecaptchaVerifier(
-      "recaptcha-container",              // must exist in DOM
-      {
-        size: "invisible",                // switch to "normal" if you want to see it while debugging
-        callback: () => {
-          console.log("reCAPTCHA solved ✅");
-        },
-        "expired-callback": () => {
-          console.warn("reCAPTCHA expired; will be reset on next attempt.");
-        },
-      },
-      auth
-    );
 
-    // render is recommended to ensure the widget is fully created
-    window.recaptchaVerifier.render().then((widgetId: number) => {
-      window.recaptchaWidgetId = widgetId;
-      console.log("reCAPTCHA widgetId:", widgetId);
-    });
-  }
-  return window.recaptchaVerifier!;
-}
+// For development - you can add test phone numbers in Firebase Console
+// Go to Firebase Console > Authentication > Sign-in method > Phone > Phone numbers for testing
+// Add: +91 1234567890 with OTP: 123456 (for testing purposes)
 
-// --- Send OTP helper ---
-export async function sendOtpE164(phoneE164: string): Promise<ConfirmationResult> {
-  const appVerifier = setupRecaptcha();
-  // Simple guardrails/logging
-  if (!phoneE164.startsWith("+")) {
-    throw new Error("Phone must be in E.164 format (e.g., +919876543210).");
-  }
-  console.log("Sending OTP to:", phoneE164);
-  return await signInWithPhoneNumber(auth, phoneE164, appVerifier);
-}
+// Optional: Connect to emulator in development
+// if (import.meta.env.DEV) {
+//   connectAuthEmulator(auth, "http://localhost:9099");
+// }

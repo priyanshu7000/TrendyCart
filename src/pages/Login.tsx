@@ -1,140 +1,114 @@
+// pages/Login.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import { auth } from "../lib/firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [phone, setPhone] = useState("");
-  const [otpStep, setOtpStep] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignup, setIsSignup] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [confirmationResult, setConfirmationResult] = useState<any>(null);
-
-  /*Initialize reCAPTCHA verifier */
-  /*
-  const initRecaptcha = () => {
-    return new RecaptchaVerifier(
-      "recaptcha-container",
-      { size: "invisible" },
-      auth
-    );
-  };
-*/
-  const handleContinue = async () => {
-    if (!phone || !checked) return;
+  const handleAuth = async () => {
     setError("");
     setLoading(true);
+
     try {
-      //const recaptcha = initRecaptcha();
-      const result = await signInWithPhoneNumber(auth, `+91${phone}`);
-      setConfirmationResult(result);
-      setOtpStep(true);
+      if (isSignup) {
+        // Sign up
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(result.user);
+        alert("Verification email sent! Please check your inbox.");
+      } else {
+        // Login
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        if (!result.user.emailVerified) {
+          setError("Please verify your email before logging in.");
+          return;
+        }
+        navigate("/profile");
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to send OTP");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const [otp, setOtp] = useState("");
-  const handleVerifyOtp = async () => {
-    setError("");
-    setLoading(true);
+  const handleResetPassword = async () => {
+    if (!email) {
+      setError("Enter your email to reset password.");
+      return;
+    }
     try {
-      if (!confirmationResult) throw new Error("Please request OTP first");
-      const res = await confirmationResult.confirm(otp);
-      console.log("Logged in user:", res.user);
-      navigate("/profile");
+      await sendPasswordResetEmail(auth, email);
+      alert("Password reset email sent!");
     } catch (err: any) {
-      setError(err.message || "OTP verification failed");
-    } finally {
-      setLoading(false);
+      setError(err.message);
     }
   };
 
-  if (user) navigate("/profile");
+  if (user) {
+    navigate("/profile");
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        {!otpStep ? (
-          <>
-            <h2 className="text-2xl font-semibold mb-6">Login or <span className="font-bold">Signup</span></h2>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          {isSignup ? "Create Account" : "Login"}
+        </h2>
 
-            <div className="mb-4">
-              <div className="flex items-center border rounded overflow-hidden">
-                <span className="px-3 bg-gray-100 border-r">+91</span>
-                <input
-                  type="tel"
-                  placeholder="Mobile Number"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="flex-1 p-2 outline-none"
-                />
-              </div>
-            </div>
+        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
-            <div className="mb-4 flex items-center">
-              <input
-                type="checkbox"
-                id="terms"
-                checked={checked}
-                onChange={() => setChecked(!checked)}
-                className="mr-2"
-              />
-              <label htmlFor="terms" className="text-sm">
-                By continuing, I agree to the{" "}
-                <span className="text-purple-600">Terms of Use</span> &{" "}
-                <span className="text-purple-600">Privacy Policy</span> and I am above 18 years old.
-              </label>
-            </div>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full border p-2 rounded mb-3"
+        />
 
-            {error && <p className="text-red-600 mb-2">{error}</p>}
+        <input
+          type="password"
+          placeholder="Password (min 6 chars)"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full border p-2 rounded mb-3"
+        />
 
-            <button
-              onClick={handleContinue}
-              disabled={!phone || !checked || loading}
-              className={`w-full py-2 rounded text-white font-semibold ${
-                phone && checked
-                  ? "bg-purple-600 hover:bg-purple-700"
-                  : "bg-gray-400 cursor-not-allowed"
-              }`}
-            >
-              {loading ? "Processing..." : "CONTINUE"}
-            </button>
+        <button
+          onClick={handleAuth}
+          disabled={loading}
+          className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
+        >
+          {loading ? "Processing..." : isSignup ? "Sign Up" : "Login"}
+        </button>
 
-            <p className="mt-4 text-sm text-center text-gray-500">
-              Have trouble logging in? <span className="text-purple-600 cursor-pointer">Get help</span>
-            </p>
-            
-            {/**This is the Recaptcha */}
-            {/** <div id="recaptcha-container"></div> */}
-          </>
-        ) : (
-          <>
-            <h2 className="text-2xl font-semibold mb-6">Enter OTP</h2>
-            <input
-              type="text"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              placeholder="6-digit OTP"
-              className="w-full p-2 border rounded mb-4"
-            />
-            <button
-              onClick={handleVerifyOtp}
-              disabled={loading}
-              className="w-full py-2 rounded bg-green-600 text-white font-semibold"
-            >
-              {loading ? "Verifying..." : "Verify OTP"}
-            </button>
-          </>
-        )}
+        <p
+          onClick={() => setIsSignup(!isSignup)}
+          className="text-purple-600 mt-4 text-center cursor-pointer"
+        >
+          {isSignup ? "Already have an account? Login" : "Don’t have an account? Sign Up"}
+        </p>
+
+        <p
+          onClick={handleResetPassword}
+          className="text-sm text-center mt-3 text-gray-500 cursor-pointer hover:text-purple-600"
+        >
+          Forgot Password?
+        </p>
       </div>
     </div>
   );

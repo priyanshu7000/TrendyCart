@@ -3,8 +3,10 @@ import React, {
   useContext,
   useState,
   useEffect,
-  ReactNode,
+  
 } from "react";
+
+import type{ReactNode} from "react";
 
 export interface Product {
   id: number;

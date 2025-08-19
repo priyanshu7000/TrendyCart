@@ -42,6 +42,8 @@ const SigninPhone: React.FC = () => {
     }
   };
 
+
+  
   const handleVerifyOTP = async () => {
     if (!/^\d{4,8}$/.test(otp)) { // most OTPs are 6, but allow 4-8 for test numbers
       alert("Please enter a valid OTP.");

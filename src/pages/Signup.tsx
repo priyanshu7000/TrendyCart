@@ -48,7 +48,7 @@ const Signup = () => {
         email,
         createdAt: new Date(),
       });
-      await sendEmailVerification(user);
+      await sendEmailVerification(userCredential.user);
       console.log("User signed up successfully:", user);
       alert("Signup successful! A verification email has been sent");
     } catch (err: unknown) {

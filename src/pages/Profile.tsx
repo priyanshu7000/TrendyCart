@@ -1,3 +1,5 @@
+{
+  /**
 import { useAuth } from "../context/AuthContext";
 
 const Profile = () => {
@@ -19,6 +21,19 @@ const Profile = () => {
         Logout
       </button>
     </div>
+  );
+};
+
+ */
+}
+
+//export default Profile;
+
+const Profile = () => {
+  return (
+    <>
+      <div className="display-flex align-top">This is Profile Page</div>
+    </>
   );
 };
 

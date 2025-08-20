@@ -68,8 +68,8 @@ const Navbar = () => {
                 >
                   Signup
                 </Link>
-                <Link to="/login" className="block px-4 py-2 hover:bg-gray-100">
-                  Login
+                <Link to="/signin" className="block px-4 py-2 hover:bg-gray-100">
+                  Signin
                 </Link>
                 <button className="w-full text-left px-4 py-2 hover:bg-gray-100">
                   Logout
@@ -103,7 +103,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu / Hamburger */}
         {isOpen && (
           <div className="md:hidden mt-2 flex flex-col space-y-4 pb-4">
             <input
@@ -139,8 +139,8 @@ const Navbar = () => {
               Signup
             </Link>
 
-            <Link to="/login" className="hover:text-primary transition-colors">
-              Login
+            <Link to="/signin" className="hover:text-primary transition-colors">
+              Signin
             </Link>
           </div>
         )}

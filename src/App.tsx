@@ -10,10 +10,10 @@ import CategoryPage from "./pages/CategoryPage";
 import ProductDetails from "./pages/ProductDetails";
 //import SigninPhone from "./pages/SigninPhone";
 import ProtectedRoute from "./components/PrivateRoute";
-import Login from "./pages/Login";
+//import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Signup from "./pages/Signup";
-
+import Signin from "./pages/Signin";
 
 function App() {
   return (
@@ -33,8 +33,9 @@ function App() {
         <Route path="/product/:id" element={<ProductDetails />} />
 
         {/* Auth pages */}
-        <Route path="/signup" element={<Signup/>}></Route>
-        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />}></Route>
+        <Route path="/signin" element={<Signin />}></Route>
+        {/**<Route path="/login" element={<Login />} /> */}
 
         {/*** <Route path="/signin" element={<SigninPhone />} /> */}
 

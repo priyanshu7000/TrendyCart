@@ -14,6 +14,12 @@ type Product = {
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   // ...existing code...
+
+  //this is to handle loading states
+  const [loading, setLoading] = useState(true);
+  //this is to handle errors
+  const [error, setError] = useState<string | null>(null);
+
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -27,6 +33,9 @@ const Products = () => {
         setProducts(data);
       } catch (error) {
         console.error("Failed to fetch products:", error);
+        setError("Failed to fetch products. Please try again later.");
+      } finally {
+        setLoading(false);
       }
     };
     fetchProducts();
@@ -45,6 +54,39 @@ const Products = () => {
       });
     }
   };
+
+  //skeleton loader component
+  const SkeletonCard = () => (
+    <div className="border rounded-lg p-4 shadow animate-pulse">
+      <div className="bg-gray-300 h-40 w-full rounded-md"></div>
+      <div className="mt-4 h-4 bg-gray-300 rounded w-3/4"></div>
+      <div className="mt-2 h-4 bg-gray-300 rounded w-1/2"></div>
+      <div className="mt-4 h-10 bg-gray-300 rounded"></div>
+    </div>
+  );
+
+  //Show loading state as a skeleton loader
+  if (loading) {
+    return (
+      <div className="p-6 text-center">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  //Show error state
+  //Show loading state
+  if (error) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-red-500 font-semibold">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">

@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  
+} from "react";
+
+import type{ReactNode} from "react";
 
 export interface Product {
   id: number;
@@ -21,24 +29,32 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState<Product[]>(() => {
+    // Load from localStorage initially
+    const saved = localStorage.getItem("cartItems");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Sync with localStorage whenever cartItems change
+  useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+  }, [cartItems]);
 
   const addToCart = (product: Product) => {
-    console.log("Adding to cart:", product);
     setCartItems((prevItems) => {
+      //check if already in cart
       const existing = prevItems.find((item) => item.id === product.id);
-      let updated;
       if (existing) {
-        updated = prevItems.map((item) =>
+        // Replace with selected quantity insted of 1
+        //if already exists, update quantity
+        return prevItems.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + product.quantity }
             : item
         );
       } else {
-        updated = [...prevItems, { ...product, quantity: 1 }];
+        return [...prevItems, product];
       }
-      console.log("Cart after update:", updated);
-      return updated;
     });
   };
 

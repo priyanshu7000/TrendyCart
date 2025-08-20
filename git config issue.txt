@@ -1,0 +1,7 @@
+I worked on this project entirely by myself, but since I was using a company system that had been previously configured
+with another user’s GitHub account, the commits were initially showing under their name. 
+I forgot to change the local Git configuration before pushing my code, which is why the contributions appeared as if 
+they belonged to someone else. 
+After realizing this, I corrected the Git configuration to my own GitHub account and rewrote 
+the commit history so that all contributions are now correctly attributed to me. This project is completely 
+my work and the commit history mismatch happened only because of the system’s pre-existing Git setup.

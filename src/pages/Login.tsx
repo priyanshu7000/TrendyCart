@@ -10,12 +10,14 @@ import {
 } from "firebase/auth";
 import { useAuth } from "../context/AuthContext";
 
+
 const Login = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [isSignup, setIsSignup] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,11 @@ const Login = () => {
     try {
       if (isSignup) {
         // Sign up
-        const result = await createUserWithEmailAndPassword(auth, email, password);
+        const result = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
         await sendEmailVerification(result.user);
         alert("Verification email sent! Please check your inbox.");
       } else {
@@ -88,6 +94,7 @@ const Login = () => {
           className="w-full border p-2 rounded mb-3"
         />
 
+
         <button
           onClick={handleAuth}
           disabled={loading}
@@ -100,7 +107,9 @@ const Login = () => {
           onClick={() => setIsSignup(!isSignup)}
           className="text-purple-600 mt-4 text-center cursor-pointer"
         >
-          {isSignup ? "Already have an account? Login" : "Don’t have an account? Sign Up"}
+          {isSignup
+            ? "Already have an account? Login"
+            : "Don’t have an account? Sign Up"}
         </p>
 
         <p

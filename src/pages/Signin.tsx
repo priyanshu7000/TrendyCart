@@ -9,10 +9,16 @@ import { FirebaseError } from "firebase/app";
 import { auth } from "../lib/firebase";
 import { useNavigate, Link } from "react-router-dom"; //for page navigation
 
+//import eye icon frm lucide for password field
+import { Eye, EyeOff } from "lucide-react";
+
 const Signin = () => {
   //Make the states
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  //for showing password
+  const [showPassword, setShowPassword] = useState(false);
+
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -93,16 +99,29 @@ const Signin = () => {
           className="w-full border p-2 rounded mb-3"
           autoComplete="email"
         />
+        <div className="w-full mb-3 relative">
+          <input
+            type= {showPassword ? "Text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border p-2 rounded mb-3"
+            autoComplete="current-password"
+          />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border p-2 rounded mb-3"
-          autoComplete="current-password"
-        />
-
+          {/**Eye icon for showing password */}
+          <button
+            type="button"
+            onClick={() => {
+              setShowPassword(!showPassword);
+              //showPassword for actually showing the password
+              console.log("Show Password:", showPassword);
+            }}
+            className="absolute right-3 top-2 text-gray-600"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
         <button

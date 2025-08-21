@@ -5,7 +5,8 @@ import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { sendEmailVerification } from "firebase/auth";
 import type { FirebaseError } from "firebase/app";
-
+//import eye icon from lucide
+import { Eye, EyeOff } from "lucide-react";
 const Signup = () => {
   //we are creating the state to store Name, Phone, Email, Password, Confirm Password
   const [name, setName] = useState("");
@@ -13,7 +14,8 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
+  //for show password
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
   //for email verification
@@ -97,21 +99,44 @@ const Signup = () => {
           className="w-full border p-2 rounded mb-3"
         />
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border p-2 rounded mb-3"
-        />
+        <div className="relative w-full mb-3">
+          <input
+            // type="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border p-2 rounded mb-3"
+          />
+          <button
+            type="button"
+            onClick={() => {setShowPassword(!showPassword)
+              //showPassword for actually showing the password
+              console.log("Show Password:", showPassword);
+            }}
+            className="absolute right-3 top-2 text-gray-600"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full border p-2 rounded mb-3"
-        />
+        <div className="relative w-full mb-3">
+          <input
+            //type = password is hardcoded that's why we are using showPassword with ternary operator
+            type={showPassword ? "text" : "password"}
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="w-full border p-2 rounded mb-3"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-2 text-gray-600"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
 
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 

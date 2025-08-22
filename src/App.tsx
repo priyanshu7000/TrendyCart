@@ -40,14 +40,7 @@ function App() {
         {/*** <Route path="/signin" element={<SigninPhone />} /> */}
 
         {/* Protected pages */}
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/profile" element={<Profile />} />
         <Route
           path="/checkout"
           element={

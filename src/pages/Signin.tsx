@@ -101,7 +101,7 @@ const Signin = () => {
         />
         <div className="w-full mb-3 relative">
           <input
-            type= {showPassword ? "Text" : "password"}
+            type={showPassword ? "Text" : "password"}
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -127,13 +127,23 @@ const Signin = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 rounded text-white font-semibold ${
+          className={`w-full py-2 rounded text-white font-semibold  ${
             loading
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-purple-600 hover:bg-purple-700"
           }`}
         >
-          {loading ? "Signing in..." : "Sign In"}
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 mr-3 ..."
+                viewBox="0 0 24 24"
+              ></svg>
+              "Signing in..."
+            </>
+          ) : (
+            "Sign In"
+          )}
         </button>
 
         <div className="flex items-center justify-between mt-4">

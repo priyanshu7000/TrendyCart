@@ -38,8 +38,8 @@ const CategoryPage = () => {
         }
 
         const res = await fetch(
-          //          `https://fakestoreapi.com/products/category/${apiCategory}`
-          `https://dummyjson.com/products/categories/${apiCategory}`
+          `https://fakestoreapi.com/products/category/${apiCategory}`
+          //`https://dummyjson.com/products/categories/${apiCategory}`
         );
         const data = await res.json();
 

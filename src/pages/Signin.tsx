@@ -8,7 +8,8 @@ import {
 import { FirebaseError } from "firebase/app";
 import { auth } from "../lib/firebase";
 import { useNavigate, Link } from "react-router-dom"; //for page navigation
-
+//import background image
+import backgroundImage from "../assets/background_image/backgroundImage.png";
 //import eye icon frm lucide for password field
 import { Eye, EyeOff } from "lucide-react";
 
@@ -24,6 +25,7 @@ const Signin = () => {
 
   const navigate = useNavigate();
 
+  const bgImage = backgroundImage;
   //this is an ts object with typescript utility with key value pair with both string, string and have some errors which may occur and give the value if that key hit you can use that value
   const errorMessages: Record<string, string> = {
     "auth/user-not-found": "No account found with this email.",
@@ -83,8 +85,12 @@ const Signin = () => {
     }
   };
 
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div
+      className="min-h-screen flex items-center justify-center bg-gray-50 p-4 bg-center bg-cover"
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
       <form
         onSubmit={handleSignin}
         className="bg-white p-6 rounded-lg shadow-md w-full max-w-md"
@@ -109,8 +115,9 @@ const Signin = () => {
             autoComplete="current-password"
           />
 
-          {/**Eye icon for showing password */}
           <button
+          //eye icon
+
             type="button"
             onClick={() => {
               setShowPassword(!showPassword);
@@ -161,7 +168,7 @@ const Signin = () => {
         </div>
       </form>
     </div>
-  );
-};
+  );  
+}; 
 
 export default Signin;

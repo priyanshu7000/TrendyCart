@@ -14,6 +14,9 @@ primary: "#7C3AED",     // Vivid Purple
       fontFamily: {
         sans: ["Poppins", "sans-serif"], // Premium clean font
       },
+      animation: {
+        fade: 'fade 10s ease-in-out infinite',
+      },
     },
   },
   plugins: [],

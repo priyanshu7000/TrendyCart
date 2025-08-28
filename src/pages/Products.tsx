@@ -1,6 +1,8 @@
 import ProductCard from "../components/ProductCard";
 import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
+import axios from "axios";
+import Loader from "./Loader";
 
 // ...existing code...
 
@@ -16,29 +18,45 @@ const Products = () => {
   // ...existing code...
 
   //this is to handle loading states
-  const[loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   //this is to handle errors
-  const[error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const { addToCart } = useCart();
 
+  // useEffect(() => {
+  //   const fetchProducts = async () => {
+  //     try {
+  //       const res = await fetch("https://fakestoreapi.com/products");
+  //       if (!res.ok) {
+  //         throw new Error(`HTTP error! status: ${res.status}`);
+  //       }
+  //       const data = await res.json();
+  //       setProducts(data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch products:", error);
+  //       console.error(error);
+  //     }finally{
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchProducts();
+  // }, []);
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch("https://fakestoreapi.com/products");
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        const data = await res.json();
-        setProducts(data);
-      } catch (error) {
+    setLoading(true);
+    axios
+      .get<Product[]>("https://fakestoreapi.com/products")
+      .then((res) => {
+        setProducts(res.data);
+      })
+      .catch((error) => {
         console.error("Failed to fetch products:", error);
-        console.error(error);
-      }finally{
+        setError("Failed to load products.");
+      })
+      .finally(() => {
         setLoading(false);
-      }
-    };
-    fetchProducts();
+      });
   }, []);
 
   const handleAddToCart = (id: number) => {
@@ -54,6 +72,10 @@ const Products = () => {
       });
     }
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="p-6">

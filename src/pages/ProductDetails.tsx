@@ -37,7 +37,7 @@ const ProductDetails = () => {
         const relData = await relRes.json();
         setRelated(relData.filter((p: Product) => p.id !== data.id));
       } catch (err) {
-        setError("Product not found");
+        setError("Product not found" + err);
       } finally {
         setLoading(false);
       }

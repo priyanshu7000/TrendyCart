@@ -40,7 +40,8 @@ const Profile: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 flex flex-col items-center">
+    <div className="p-6 flex flex-col items-center 3
+    ">
       {/* Profile Card */}
       <div className="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-6 w-full max-w-md text-center">
         {/* Avatar */}

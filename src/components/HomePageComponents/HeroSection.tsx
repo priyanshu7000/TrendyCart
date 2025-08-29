@@ -27,6 +27,14 @@ const HeroSection = () => {
     return () => clearInterval(interval);
   }, []); // Empty dependency array to run only once on mount
 
+
+  //for hero section image animation
+  const [isVisible, setIsVisible] =useState(false);
+  useEffect(()=>{
+    setIsVisible(true);
+  },[]);
+
+
   const categories = [
     {
       name: "Clothing",
@@ -50,7 +58,9 @@ const HeroSection = () => {
     <div className="w-full m-0 p-0">
       {/* Hero Section with Background Image */}
       <section
-        className="relative w-full h-[80vh] bg-cover bg-center"
+         className={`relative w-full h-[80vh] bg-cover bg-center transition-opacity duration-1000 ease-out ${
+        isVisible ? "opacity-100" : "opacity-0"
+      }`}
         style={{
           backgroundImage: `url(${banner})`,
         }}

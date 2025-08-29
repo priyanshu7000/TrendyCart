@@ -16,6 +16,7 @@ primary: "#7C3AED",     // Vivid Purple
       },
       animation: {
         fade: 'fade 10s ease-in-out infinite',
+        fadeIn: 'fade-in 4s ease-in forwards'
       },
     },
   },

@@ -1,9 +1,14 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
 import { useEffect, useState } from "react";
 import { doc, setDoc } from "firebase/firestore";
 
 import { auth, db } from "../lib/firebase";
-import { sendEmailVerification } from "firebase/auth";
+
 import type { FirebaseError } from "firebase/app";
 //import eye icon from lucide
 import { Eye, EyeOff } from "lucide-react";
@@ -14,6 +19,9 @@ import image03 from "../assets/signUp_Page_images/image03.png";
 import image04 from "../assets/signUp_Page_images/image04.png";
 import image05 from "../assets/signUp_Page_images/image05.png";
 import backgroundImage from "../assets/background_image/backgroundImage.png";
+import toast from "react-hot-toast";
+import Loader from "../components/Loader";
+
 const Signup = () => {
   //we are creating the state to store Name, Phone, Email, Password, Confirm Password
   const [name, setName] = useState("");
@@ -31,6 +39,10 @@ const Signup = () => {
   //bg-image
   const bgImage = backgroundImage;
   const [currentImage, setCurrentImage] = useState(0);
+
+  //for loader
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % images.length);
@@ -44,135 +56,87 @@ const Signup = () => {
   //We are handling the Signup
   //updating the handle signup
   const handleSignup = async () => {
-    setError("");
+  setIsLoading(true);
+  setError("");
 
-    if (!name || !phone || !email || !password || !confirmPassword) {
-      setError("All fields are required.");
-      return;
+  if (!name || !phone || !email || !password || !confirmPassword) {
+    setError("All fields are required.");
+    setIsLoading(false);
+    return;
+  }
+  if (password !== confirmPassword) {
+    setError("Passwords do not match.");
+    setIsLoading(false);
+    return;
+  }
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    await setDoc(doc(db, "users", user.uid), {
+      name,
+      phone,
+      email,
+      createdAt: new Date(),
+    });
+    await sendEmailVerification(user);
+
+    toast.success("Signup successful! A verification email has been sent");
+  } catch (err: unknown) {
+    const error = err as FirebaseError;
+    if (error.code === "auth/email-already-in-use") {
+      setError("This email is already registered. Please log in instead.");
+    } else {
+      setError(error.message || "An unknown error occurred");
     }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    try {
-      //create user in Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
-
-      //Store extra info in Firestoe (Linked with user.uid)
-      await setDoc(doc(db, "users", user.uid), {
-        name,
-        phone,
-        email,
-        createdAt: new Date(),
-      });
-      await sendEmailVerification(userCredential.user);
-      console.log("User signed up successfully:", user);
-      alert("Signup successful! A verification email has been sent");
-    } catch (err: unknown) {
-      const error = err as FirebaseError;
-      if (err instanceof Error) {
-        setError(err.message);
-        if (error.code === "auth/email-already-in-use") {
-          setError("This email is already registered. Please log in instead.");
-        } else {
-          setError(error.message);
-        }
-      } else {
-        setError("An unknown error occurred");
-      }
-    }
-    //Firebase logic will go here later
-    console.log("Signup data:", { name, phone, email, password });
-  };
-
-  /**  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4 text-center">Create Account</h2>
-
-        <input
-          type="text"
-          placeholder="Full Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full border p-2 rounded mb-3"
-        />
-
-        <input
-          type="text"
-          placeholder="Phone Number"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="w-full border p-2 rounded mb-3"
-        />
-
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full border p-2 rounded mb-3"
-        />
-
-        <div className="relative w-full mb-3">
-          <input
-            // type="password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full border p-2 rounded mb-3"
-          />
-          <button
-            type="button"
-            onClick={() => {
-              setShowPassword(!showPassword);
-              //showPassword for actually showing the password
-              console.log("Show Password:", showPassword);
-            }}
-            className="absolute right-3 top-2 text-gray-600"
-          >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
-        </div>
-
-        <div className="relative w-full mb-3">
-          <input
-            //type = password is hardcoded that's why we are using showPassword with ternary operator
-            type={showConfirmPassword ? "text" : "password"}
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full border p-2 rounded mb-3"
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-2 text-gray-600"
-          >
-            {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
-        </div>
-
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
-
-        <button
-          onClick={handleSignup}
-          className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
-        >
-          Sign Up
-        </button>
-      </div>
-    </div>
-  );
+  } finally {
+    // 👈 ensures loader always stops
+    setIsLoading(false);
+  }
 };
- */
+
+
+  //for googlesignup handle
+const handleGoogleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  e.preventDefault();
+  setIsLoading(true);
+
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        name: user.displayName || "",
+        email: user.email || "",
+        phone: user.phoneNumber || "",
+        photoURL: user.photoURL || "",
+        createdAt: new Date(),
+      },
+      { merge: true }
+    );
+
+    toast.success("Signup with Google successful!");
+  } catch (err: unknown) {
+    const error = err as FirebaseError;
+
+    if (error.code === "auth/popup-closed-by-user") {
+      toast.error("Popup closed. Please try again.");
+    } else {
+      setError(error.message);
+      toast.error(error.message);
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   return (
     <div
@@ -279,7 +243,10 @@ const Signup = () => {
           {/**this is the pre-define tailwind css google and facebook icons */}
           <div className="flex items-center justify-center space-x-4 mt-4">
             {/* Google Button */}
-            <button className="flex items-center justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <button
+              onClick={handleGoogleSignup}
+              className="flex items-center justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
               <svg
                 className="w-6 h-6 mr-2"
                 viewBox="0 0 24 24"

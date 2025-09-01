@@ -14,14 +14,16 @@ import ProtectedRoute from "./components/PrivateRoute";
 import Profile from "./pages/Profile";
 import Signup from "./pages/Signup";
 import Signin from "./pages/Signin";
-
+import toast, { Toaster } from "react-hot-toast";
 function App() {
   return (
     <CartProvider>
+      <Toaster position="top-right" reverseOrder={false} />
       <Navbar />
 
       <Routes>
         {/* Public pages */}
+
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/cart" element={<Cart />} />

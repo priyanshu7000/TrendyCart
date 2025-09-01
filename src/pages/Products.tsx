@@ -2,7 +2,7 @@ import ProductCard from "../components/ProductCard";
 import { useEffect, useState } from "react";
 import { useCart } from "../context/CartContext";
 import axios from "axios";
-import Loader from "./Loader";
+import Loader from "../components/Loader";
 
 // ...existing code...
 

@@ -4,7 +4,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { doc, setDoc } from "firebase/firestore";
 
 import { auth, db } from "../lib/firebase";
@@ -12,6 +12,7 @@ import { auth, db } from "../lib/firebase";
 import type { FirebaseError } from "firebase/app";
 //import eye icon from lucide
 import { Eye, EyeOff } from "lucide-react";
+import { useNavigate } from "react-router";
 
 import image01 from "../assets/signUp_Page_images/image01.png";
 import image02 from "../assets/signUp_Page_images/image02.png";
@@ -40,8 +41,20 @@ const Signup = () => {
   const bgImage = backgroundImage;
   const [currentImage, setCurrentImage] = useState(0);
 
+
   //for loader
   const [isLoading, setIsLoading] = useState(false);
+  // track if component is mounted
+  const isMounted = useRef(true);
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  //this is for navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -98,42 +111,72 @@ const Signup = () => {
 
 
   //for googlesignup handle
+// const handleGoogleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
+//   e.preventDefault();
+//   setIsLoading(true);
+
+//   try {
+//     const provider = new GoogleAuthProvider();
+//     const result = await signInWithPopup(auth, provider);
+//     // ...
+//     console.log("User successfully sign up ", result.user);
+//     //navigate to home page after signup
+//     navigate("/home");
+//   } catch (err: unknown) {
+//     const error = err as FirebaseError;
+
+//     if (error.code === "auth/popup-closed-by-user") {
+//       toast.error("Popup closed. Please try again.");
+
+//       //explicity stop the loader
+//       setIsLoading(false);
+//        navigate("/signup");
+//     } else {
+//       setError(error.message);
+//       toast.error(error.message);
+//     }
+//   } finally {
+//     setIsLoading(false);
+//   }
+// };
+
 const handleGoogleSignup = async (e: React.MouseEvent<HTMLButtonElement>) => {
   e.preventDefault();
+  if (!isMounted.current) return;
   setIsLoading(true);
-
+  setError(""); // Clear any previous errors
   try {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-
-    await setDoc(
-      doc(db, "users", user.uid),
-      {
-        name: user.displayName || "",
-        email: user.email || "",
-        phone: user.phoneNumber || "",
-        photoURL: user.photoURL || "",
-        createdAt: new Date(),
-      },
-      { merge: true }
-    );
-
-    toast.success("Signup with Google successful!");
+    if (!isMounted.current) return;
+    // Store user data in Firestore (optional, similar to email signup)
+    await setDoc(doc(db, "users", result.user.uid), {
+      name: result.user.displayName || "Google User",
+      email: result.user.email,
+      createdAt: new Date(),
+    });
+    toast.success("Google signup successful!");
+    if (isMounted.current) navigate("/home");
   } catch (err: unknown) {
     const error = err as FirebaseError;
-
     if (error.code === "auth/popup-closed-by-user") {
-      toast.error("Popup closed. Please try again.");
+      if (isMounted.current) {
+        toast.error("Signup cancelled. Please try again.");
+      }
+    } else if (error.code === "auth/cancelled-popup-request") {
+      if (isMounted.current) toast.error("Please wait for the current popup to complete.");
     } else {
-      setError(error.message);
-      toast.error(error.message);
+      if (isMounted.current) {
+        setError(error.message || "Google signup failed");
+        toast.error(error.message || "Google signup failed");
+      }
     }
   } finally {
-    setIsLoading(false);
+    if (isMounted.current) setIsLoading(false);
   }
 };
 
+console.log("🔍 Component render - isLoading:", isLoading);
   if (isLoading) {
     return <Loader />;
   }
